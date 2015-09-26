@@ -13,13 +13,11 @@ mtcars2<-select(mtcars2,mpg,disp,wt,hp,Cylinder,AutoTransmission)
 
 
 
-g2<-ggplot(data=mtcars2,aes(x=disp,y=mpg,col=AutoTransmission))
-(g2+geom_point(size=4,alpha=0.7)
-+scale_color_brewer(palette="Set1")
-+ggtitle("Exploratory Plot: mpg ~ displacement")
-+labs(x="Displacement (cu.in.)",y="Miles/(US)Gallon")
-)
-
+g2<-ggplot(data=mtcars2,aes(x=disp,y=mpg))+geom_point(size=4,alpha=0.7,aes(col=AutoTransmission))+geom_smooth(method="lm")+ggtitle("Exploratory Plot: mpg ~ displacement")+labs(x="Displacement (cu.in.)",y="Miles/(US)Gallon")
+g3<-ggplot(data=mtcars2,aes(x=hp,y=mpg))+geom_point(size=4,alpha=0.7,aes(col=AutoTransmission))+geom_smooth(method="lm")+ggtitle("Exploratory Plot: mpg ~ horsepower")+labs(x="Horsepower",y="Miles/(US)Gallon")
+g4<-ggplot(data=mtcars2,aes(x=wt,y=mpg))+geom_point(size=4,alpha=0.7,aes(col=AutoTransmission))+geom_smooth(method="lm")+ggtitle("Exploratory Plot: mpg ~ wt")+labs(x="Car weight (1000 lbs)",y="Miles/(US)Gallon")
+g5<-ggplot(data=mtcars2,aes(x=Cylinder,y=mpg))+geom_point(size=4,alpha=0.7,aes(col=AutoTransmission))+ggtitle("Exploratory Plot: mpg ~ wt")+labs(x="Cylinders",y="Miles/(US)Gallon")
+grid.arrange(g2,g3,g4,g5,ncol=2)
 
 fit_all<-lm(data=mtcars2,mpg~hp+AutoTransmission)
 par(mfrow=c(2,2))
