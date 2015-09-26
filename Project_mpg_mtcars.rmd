@@ -1,0 +1,24 @@
+---
+title: "A Study on Vehicles' Gas Mileage via Linear Regression Models"
+author: "Wenhe 'Wayne' Ye"
+date: "September 25, 2015"
+output: html_document
+---
+##Overview  
+
+
+##Data Processing 
+First we need to call a few useful R packages to facilitate our analysis and load data *mtcars* into work space.  
+```{r}
+library(ggplot2);library(GGally);library(dplyr);
+data(mtcars)
+```
+
+
+##Analysis  
+
+
+##Conclusion  
+
+
+
