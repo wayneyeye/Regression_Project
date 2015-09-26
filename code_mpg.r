@@ -22,12 +22,15 @@ grid.arrange(g2,g3,g4,g5,ncol=2)
 
 
 fit_1<-lm(data=mtcars2,mpg~AutoTransmission*wt+Cylinder)
-fit_2<-lm(data=mtcars2,mpg~AutoTransmission*wt+Cylinder+hp)
+fit_2<-lm(data=mtcars2,mpg~AutoTransmission*wt+Cylinder+hp+disp)
 fit_all<-lm(data=mtcars2,mpg~AutoTransmission*wt+disp+hp+Cylinder)
 par(mfrow=c(2,2))
 for (i in 1:4){
         plot(fit_1,which=i)
 }
+
+
+summary(fit_1)
 
 anova(fit_1,fit_2,fit_all)
 
