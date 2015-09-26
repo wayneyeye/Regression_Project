@@ -2,13 +2,26 @@
 title: "A Study on Vehicles' Gas Mileage via Regression Models"
 author: "Wenhe 'Wayne' Ye"
 date: "September 25, 2015"
-output: pdf_document
+output: html_document
 ---
+**Note: In order to save space for the report, we put all the plots in the supporting information section.**
+
 ##Executive Summary 
+We analyzed the data set mtcars with 36 observations. Our approaches to reach the research target are listed below:
+
+1.Are there any confounding variables other than the factor (types of transmission)?  
+   - An exploratory analysis is carried out to determine the confounding terms.  
+   
+2.How to find a model to describe the correlation between mpg and other parameters?  
+   - Use VIF to detect high correlation variables  
+   - Use ANOVA to judge the models validity   
+   
+3.How to interpret the fitted coeficients?  
+   - A linear regression model with interaction term is suggested. mpg may also depend on different car weight regime.
 
 ##Data Processing 
 First we need to call a few useful R packages to facilitate our analysis and load data *mtcars* into work space.  
-```{r echo=FALSE,warning=FALSE,message=FALSE}
+```{r echo=TRUE,warning=FALSE,message=FALSE}
 library(ggplot2);library(dplyr);library(grid);library(gridExtra);library(car);library(xtable)
 data(mtcars)
 ```
@@ -20,6 +33,7 @@ mtcars2<-select(mtcars2,mpg,disp,wt,hp,Cylinder,AutoTransmission)
 ##Exploratory Data Analysis  
 Since we want to explore the relationship between the mpg and whether the cars are manual or auto transmission. We make a violin plot (in supporting information (SI)) between mpg and factor of different transmission types to see the over all relationship.   
 From the plot we see manual transmission cars have a higher gas mileage over the automatic transmission. However, there might be other confounding variables need to be taken into account. For example, more high engine displacement cars tend to have manual transmission rather automatics while most economic cars are with manual ones. We select a few other variables as candidates to see their correlation with the mpg data. We picked displacement (disp), horsepower (hp), weight(wt) and number of cylinders(Cylinder) as confounding variables. (Figures can be found in SI), which supports that these variables also show some suspicious correlation with mpg. It is worth noting here, we transform the cylinder number into factors rather than a continuous varible in the following study. In order to quantify the difference between an auto transmission car and a manual transmission car, we need to carefully select the model with suitable variables and factors to make our estimation.   
+
 ##Regression Modeling  
 Our first attempt is to build a regression model includes all mentioned variables and factors (with no interaction). (mpg ~ AutoTransmission, Cylinder, disp, hp, wt). 
 ```{r}
@@ -30,33 +44,24 @@ However, the variance inflation factors (VIF) for the *fit_all* model is not opt
 vif_table<-vif(fit_all)
 vif_table[,1]
 ```
-Some VIFs have relatively high values indicating some strong correlation between variables/factors. After a trial and error process (we use ANOVA as a tool to judge if the model is under- or overfit). In the end, we only keep factors AutoTransmission, Cylinders and varible wt in the regression model. The ANOVA table below indicates the variables included are sufficient compare to *fit_all* (P-value=0.5, which means we could not reject the null hypothesis).
+Some VIFs have relatively high values indicating some strong correlation between variables/factors. After a trial and error process (we use ANOVA as a tool to judge if the model is under- or overfit). In the end, we only keep factors AutoTransmission and varible wt in the regression model. The ANOVA table below indicates the variables included are sufficient compare to *fit_all* (P-value>0.05, which means we could not reject the null hypothesis).
 ```{r echo=FALSE}
-fit_1<-lm(data=mtcars2,mpg~AutoTransmission*wt+Cylinder)
+fit_1<-lm(data=mtcars2,mpg~AutoTransmission*wt)
 fit_all<-lm(data=mtcars2,mpg~AutoTransmission*wt+Cylinder+disp+hp)
 anova(fit_1,fit_all)
 ```
 Below is the summary of the model we fit.  
 ```{r}
-fit_1<-lm(data=mtcars2,mpg~AutoTransmission*wt+Cylinder)
 summary(fit_1)
 ```
-All t-tests suggest signifant correlation in the varibles and factors we choosed. The residual & diagnostics plot to our fitted model also suggests no obvious pattern existed in residual (in SI). Below is a plot for better interpreting:  
-```{r fig.width=6,fig.height=4}
-g6<-ggplot(data=mtcars2,aes(x=wt,y=mpg))+
-        geom_smooth(method="lm",aes(group=AutoTransmission,col=AutoTransmission),size=1.2)+
-        geom_point(size=4,alpha=0.7,aes(col=Cylinder))+
-        scale_colour_manual("",values=c("black","blue","purple","green","red"),labels=c("Manual","Auto","4 Cyl","6 Cyl","8 Cyl"))+
-        labs(x="Weight (1000 lbs)",y="Gas Mileage (miles/(US)Gallon)")+
-        ggtitle("Fitted model: mpg ~ TransmissionType*Weight + # Cylinder")
-print(g6)
-```
-
+All t-tests suggest signifant correlation in the varibles and factors we choosed. The residual & diagnostics plot to our fitted model also suggests no obvious pattern existed in residual (in SI). The plot with chosen variable and factor is provided in the SI. 
 
 ##Results  
-**Q1**  
+**Q1** "Is an automatic or manual transmission better for MPG"   
+From the data set, we see the mean mpg for manual transmission cars are higher than the automatic ones. However, this comparison should be carried out in a more controlled circumstance. For example, if we are considering the cars within a certain range of weight. A car weighs less than 3000 lbs with automatic tranmission tends to have a higher mpg than a manual transmission car in the same weight region. However, a heavier car (>3000 lbs) with manual transmission is more likely to have a higher mpg than an automatic transmission car.  
 
-**Q2**  
+**Q2**  "Quantify the MPG difference between automatic and  manual transmissions"
+From our fitted model *fit_1*. Given the weight wt in lbs. The gap between a manual transmission car and an automatic transmission car (auto-manual) equals 14.88 - 3.78*wt. which means if a cars weighs more than 14.88/5.30 = 2800 lbs, you might need to choose a manual transmission one to achieve a higher mgp value.  
 
 #*Supporting Information*  
 1.mpg vs Transmission Type Violin Plot  
@@ -67,6 +72,7 @@ print(g6)
 +ggtitle("Exploratory Plot: mpg ~ AutoTransmission")
 +labs(x="Transmission Type",y="Miles/(US)Gallon"))
 ```
+
 2.mpg vs disp, hp, wt, Cylinder  
 ```{r fig.height=6,fig.width= 9, echo=FALSE}
 g2<-ggplot(data=mtcars2,aes(x=disp,y=mpg))+geom_point(size=3,alpha=0.7,aes(col=AutoTransmission))+
@@ -83,10 +89,22 @@ g5<-ggplot(data=mtcars2,aes(x=Cylinder,y=mpg))+geom_point(size=3,alpha=0.7,aes(c
         labs(x="Cylinders",y="Miles/(US)Gallon")
 grid.arrange(g2,g3,g4,g5,ncol=2)
 ```
+
 3.Residuals and Diagnostics  
-```{r fig.height=6,fig.width= 7}
+```{r fig.height=4,fig.width= 5, echo=FALSE}
 par(mfrow=c(2,2))
 for (i in 1:4){
         plot(fit_1,which=i)
 }
+```
+
+4.Fitted model:mpg~Transmission Type * Weight  
+```{r fig.width=6,fig.height=4}
+g6<-ggplot(data=mtcars2,aes(x=wt,y=mpg))+
+        geom_smooth(method="lm",aes(group=AutoTransmission,col=AutoTransmission),size=1.2)+
+        geom_point(size=4,alpha=0.7,aes(col=Cylinder))+
+        scale_colour_manual("",values=c("black","blue","purple","green","red"),labels=c("Manual","Auto","4 Cyl","6 Cyl","8 Cyl"))+
+        labs(x="Weight (1000 lbs)",y="Gas Mileage (miles/(US)Gallon)")+
+        ggtitle("Fitted model: mpg ~ TransmissionType*Weight")
+print(g6)
 ```
