@@ -1,7 +1,8 @@
-library(ggplot2);library(GGally);library(dplyr);library(grid);library(gridExtra)
+rm(list=ls())
+library(ggplot2);library(GGally);library(dplyr);library(grid);library(gridExtra);library(car);library(xtable)
 data(mtcars);
 
-ggpairs(mtcars)
+
 
 mtcars2<-mutate(mtcars,mpg,disp,wt,hp,Cylinder=as.factor(cyl),AutoTransmission=as.factor(am))
 mtcars2<-select(mtcars2,mpg,disp,wt,hp,Cylinder,AutoTransmission)
@@ -19,9 +20,21 @@ g4<-ggplot(data=mtcars2,aes(x=wt,y=mpg))+geom_point(size=4,alpha=0.7,aes(col=Aut
 g5<-ggplot(data=mtcars2,aes(x=Cylinder,y=mpg))+geom_point(size=4,alpha=0.7,aes(col=AutoTransmission))+ggtitle("Exploratory Plot: mpg ~ wt")+labs(x="Cylinders",y="Miles/(US)Gallon")
 grid.arrange(g2,g3,g4,g5,ncol=2)
 
-fit_all<-lm(data=mtcars2,mpg~hp+AutoTransmission)
+
+fit_1<-lm(data=mtcars2,mpg~AutoTransmission*wt+Cylinder)
+fit_2<-lm(data=mtcars2,mpg~AutoTransmission*wt+Cylinder+hp)
+fit_all<-lm(data=mtcars2,mpg~AutoTransmission*wt+disp+hp+Cylinder)
 par(mfrow=c(2,2))
 for (i in 1:4){
-        plot(fit_all,which=i)
+        plot(fit_1,which=i)
 }
 
+anova(fit_1,fit_2,fit_all)
+
+vif(fit_all)
+
+ggpairs(mtcars)
+
+mtcars2<-mutate(mtcars2,Trn_Cyl=interaction(AutoTransmission,Cylinder))
+g6<-ggplot(data=mtcars2,aes(x=wt,y=mpg))+geom_point(size=4,alpha=0.7,aes(col=Cylinder))+geom_smooth(method="lm",aes(group=AutoTransmission),size=1.5)
+g6
