@@ -21,7 +21,9 @@ g2<-ggplot(data=mtcars2,aes(x=disp,y=mpg,col=AutoTransmission))
 )
 
 
-fit_all<-lm(data=mtcars2,mpg~wt+Cylinder)
-vif(fit_all)
+fit_all<-lm(data=mtcars2,mpg~hp+AutoTransmission)
+par(mfrow=c(2,2))
+for (i in 1:4){
+        plot(fit_all,which=i)
+}
 
-plot(resid(fit_all)~predict(fit_all))
